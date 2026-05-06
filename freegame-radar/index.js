@@ -10,7 +10,7 @@ const emailConfig = {
   senderEmail: process.env.EMAIL_USER,
   senderPassword: process.env.EMAIL_PASS,
   recipientEmail: process.env.NOTIFY_EMAIL,
-  smtpHost: process.env.SMTP_HOST || "smtp.gmail.com",
+  smtpHost: process.env.SMTP_HOST || "smtp.office365.com",
   smtpPort: parseInt(process.env.SMTP_PORT || "587"),
 };
 
