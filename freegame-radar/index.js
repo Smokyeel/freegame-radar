@@ -10,12 +10,12 @@ const emailConfig = {
   senderEmail: process.env.EMAIL_USER,
   senderPassword: process.env.EMAIL_PASS,
   recipientEmail: process.env.NOTIFY_EMAIL,
-  smtpHost: process.env.SMTP_HOST || "smtp.office365.com",
+  smtpHost: process.env.SMTP_HOST || "smtp-relay.brevo.com",
   smtpPort: parseInt(process.env.SMTP_PORT || "587"),
 };
 
-const CHECK_INTERVAL = process.env.CHECK_INTERVAL || "0 9 * * *"; // Default: 9am daily
-const ONLY_NOTIFY_NEW = process.env.ONLY_NOTIFY_NEW !== "false"; // Default: skip already-seen games
+const CHECK_INTERVAL = process.env.CHECK_INTERVAL || "0 9 * * *";
+const ONLY_NOTIFY_NEW = process.env.ONLY_NOTIFY_NEW !== "false";
 
 // ─── Core Check Routine ───────────────────────────────────────────────────────
 
@@ -50,18 +50,26 @@ async function runCheck() {
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 
+const IS_CI = process.env.CI === "true";
+
 async function main() {
   console.log("🎮 FreeGameRadar started!");
-  console.log(`📅 Schedule: "${CHECK_INTERVAL}"`);
   console.log(`📧 Notifying: ${emailConfig.recipientEmail || "⚠ Not configured"}`);
   console.log(`🔔 Only new games: ${ONLY_NOTIFY_NEW}\n`);
 
-  // Run immediately on startup
   await runCheck();
 
-  // Then run on cron schedule
+  if (IS_CI) {
+    console.log("\n✅ CI run complete. Exiting.");
+    process.exit(0);
+  }
+
+  console.log(`📅 Schedule: "${CHECK_INTERVAL}"`);
   cron.schedule(CHECK_INTERVAL, runCheck);
   console.log(`\n⏳ Waiting for next scheduled check... (Ctrl+C to stop)\n`);
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
