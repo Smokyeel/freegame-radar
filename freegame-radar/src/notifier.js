@@ -54,7 +54,7 @@ function buildEmailHTML(games) {
     ${gameCards}
 
     <div style="text-align:center;margin-top:24px;color:#4b4b6a;font-size:11px;font-family:monospace">
-      FreeGameRadar · Running locally on your machine<br>
+      FreeGameRadar · Running on GitHub Actions<br>
       <a href="#" style="color:#7c6af7">Unsubscribe</a>
     </div>
   </div>
@@ -65,10 +65,9 @@ function buildEmailHTML(games) {
 // ─── Send Email ───────────────────────────────────────────────────────────────
 
 async function sendNotificationEmail(games, config) {
-  const { senderEmail, senderPassword, recipientEmail, smtpHost, smtpPort } =
-    config;
+  const { senderPassword, recipientEmail, smtpHost, smtpPort } = config;
 
-  if (!senderEmail || !senderPassword || !recipientEmail) {
+  if (!senderPassword || !recipientEmail) {
     console.error(
       "❌ Email config incomplete. Check your .env file (EMAIL_USER, EMAIL_PASS, NOTIFY_EMAIL)."
     );
@@ -76,11 +75,11 @@ async function sendNotificationEmail(games, config) {
   }
 
   const transporter = nodemailer.createTransport({
-    host: smtpHost || "smtp.gmail.com",
+    host: smtpHost || "smtp-relay.brevo.com",
     port: smtpPort || 587,
     secure: false,
     auth: {
-      user: senderEmail,
+      user: config.senderEmail,
       pass: senderPassword,
     },
   });
@@ -93,7 +92,7 @@ async function sendNotificationEmail(games, config) {
       .join("\n");
 
     await transporter.sendMail({
-      from: `"FreeGameRadar 🎮" <${senderEmail}>`,
+      from: `"FreeGameRadar 🎮" <rishonpremson01@gmail.com>`,
       to: recipientEmail,
       subject: `🎮 ${games.length} free game${games.length !== 1 ? "s" : ""} available today!`,
       text: `Free games right now:\n\n${plainText}`,
